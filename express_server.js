@@ -29,21 +29,34 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+app.post("/urls/:shortURL", (req, res) => {
+  let shortURL = req.params.shortURL;
+  urlDatabase[shortURL] = `http://${req.body.newURL}`;
+
+  res.redirect(`/urls/${shortURL}`);
+});
+
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
 
+
+
+//add new URLs
 app.post("/urls", (req, res) => {
   let newId = generateRandomString();
   urlDatabase[newId] = req.body.longURL;
   res.redirect(`/urls/${newId}`);
 });
+
+//Removes URL from list
 app.post("/urls/:shortURL/delete",(req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
 
+//redirects to full URL from short URL
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
