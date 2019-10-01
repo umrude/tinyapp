@@ -21,6 +21,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
+
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
@@ -86,7 +99,7 @@ app.get("/u/:shortURL", (req, res) => {
 //login cookies
 app.post("/login", (req, res) => {
   let username = req.body.username;
-  res.cookie('username', username);
+  res.cookie("username", username);
   res.redirect("/urls");
 });
 
