@@ -42,14 +42,28 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//renders urls/register
-app.get("/urls/register", (req, res) => {
+//renders /register
+app.get("/register", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
     username: req.cookies["username"]
   };
   res.render("urls_register", templateVars);
 });
+
+//adds new user to users
+app.post("/register", (req, res) => {
+  let newID = generateRandomString();
+  users[newID] = {
+    id: newID,
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.cookie("user_id", newID);
+  console.log(users);
+  res.redirect("/urls");
+});
+
 //renders /urls/new
 app.get("/urls/new", (req, res) => {
   let templateVars = {
