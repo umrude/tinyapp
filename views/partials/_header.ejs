@@ -13,19 +13,19 @@
     </div>
     <% if (!username) { %>
     <div>
-      <form method="POST" action="/login">
-        <input name="username" placeholder="Username">
-        <button type="submit" class="btn btn-primary">Submit</button>
+      <form method="POST" action="/login" class="form-inline">
+        <input name="username" placeholder="Username" class="form-control mr-sm-2">
+        <button type="submit" class="btn btn-primary my-2 my-sm-0">Submit</button>
       </form>
     </div>
     <%} else { %> 
-      <div style="width:auto; padding-right: 10px; padding-top:10px">
-        <p> Logged In As: <%= username %> </p>
-      </div>
-      <form method="POST" action="/logout">
-        <div>
-            <button type="submit" class="btn btn-primary">Log Out</button>
+      <form method="POST" action="/logout" class="form-inline">
+      <div class="form-inline">
+        <p class="form-control mr-sm-2" style="margin:0"> Logged In As: <%= username %> </p>
+        <button type="submit" class="btn btn-primary my-2 my-sm-0">Log Out</button>
         </div>
+        
+
     </form>
   <% } %>
   </nav>
