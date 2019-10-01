@@ -34,6 +34,7 @@ const users = {
   }
 };
 
+//renders /urls
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
@@ -41,6 +42,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//renders urls/register
 app.get("/urls/register", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
@@ -48,7 +50,7 @@ app.get("/urls/register", (req, res) => {
   };
   res.render("urls_register", templateVars);
 });
-
+//renders /urls/new
 app.get("/urls/new", (req, res) => {
   let templateVars = {
     username: req.cookies["username"]
@@ -56,6 +58,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+//changes longURL associated to shortURL
 app.post("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   urlDatabase[shortURL] = `http://${req.body.newURL}`;
@@ -63,6 +66,7 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
+//renders the page for :shortURL
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
@@ -71,6 +75,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+//logs out when "logout" is clicked
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/urls");
@@ -103,6 +108,7 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
+//gets the server to listen for input
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
