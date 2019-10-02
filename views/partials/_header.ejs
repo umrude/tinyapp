@@ -13,10 +13,8 @@
     </div>
     <% if (!user) { %>
     <div>
-      <form method="POST" action="/login" class="form-inline">
-        <input name="username" placeholder="Username" class="form-control mr-sm-2">
-        <button type="submit" class="btn btn-primary my-2 my-sm-0">Submit</button>
-      </form>
+        <a href="/register" class="btn btn-primary my-2 my-sm-0">Register</a>
+        <a href="/login" class="btn btn-primary my-2 my-sm-0">Login</a>
     </div>
     <%} else { %> 
       <form method="POST" action="/logout" class="form-inline">
