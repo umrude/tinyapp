@@ -25,6 +25,9 @@ const getUserByEmail = (email) => {
     }
   }
 };
+
+
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieparser());
 app.set("view engine", "ejs");
@@ -48,14 +51,34 @@ const urlDatabase = {
   "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" }
 };
 
+const urlsForUser = (id) => {
+  let result = {};
+  for (let urls in urlDatabase) {
+    if (urlDatabase[urls].userID === id) {
+      result[urls] = urlDatabase[urls].longURL;
+    }
+  }
+  return result;
+};
+
+//redirects to "home"
+app.get("/", (req,res) => {
+  res.redirect("/urls");
+});
+
 //renders /urls
 app.get("/urls", (req, res) => {
-  let templateVars = {
-    urls: urlDatabase,
-    user: users[req.cookies["user_id"]]
-  };
-  console.log(users);
-  res.render("urls_index", templateVars);
+  let cookies = users[req.cookies["user_id"]];
+  if (!cookies) {
+    res.redirect("/register");
+  } else {
+    let templateVars = {
+      urls: urlsForUser(cookies.id),
+      user: users[req.cookies["user_id"]]
+    };
+    console.log(cookies.id);
+    res.render("urls_index", templateVars);
+  }
 });
 
 //renders /register
@@ -82,12 +105,17 @@ app.get("/urls/new", (req, res) => {
 
 //renders the page for :shortURL
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]["longURL"],
-    user: users[req.cookies["user_id"]]
-  };
-  res.render("urls_show", templateVars);
+  let cookies = users[req.cookies["user_id"]];
+  if (!cookies) {
+    res.send("Please Log In");
+  } else {
+    let templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL]["longURL"],
+      user: users[req.cookies["user_id"]]
+    };
+    res.render("urls_show", templateVars);
+  }
 });
 
 //renders page for /login
