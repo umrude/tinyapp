@@ -34,6 +34,8 @@ const urlsForUser = (id) => {
   }
   return result;
 };
+const bcrypt = require('bcrypt');
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieparser());
 app.set("view engine", "ejs");
@@ -135,7 +137,7 @@ app.post("/register", (req, res) => {
     users[newID] = {
       id: newID,
       email: req.body.email,
-      password: req.body.password
+      password: bcrypt.hashSync(req.body.password, 10)
     };
     res.cookie("user_id", newID);
     res.redirect("/urls");
@@ -151,10 +153,10 @@ app.post("/login", (req,res) => {
     res.status(403);
     res.send('403: email not found');
   } else {
-    if (user.password !== password) {
+    if (!bcrypt.compareSync(password,user.password)) {
       res.status(403);
       res.send("403: Wrong password/email");
-    } else if (user.password === password) {
+    } else if (bcrypt.compareSync(password, user.password)) {
       res.cookie("user_id", user.id);
       res.redirect("/urls");
     }
@@ -202,13 +204,8 @@ app.post("/urls/:shortURL/delete",(req, res) => {
 
 //redirects to full URL from short URL
 app.get("/u/:shortURL", (req, res) => {
-  let cookies = users[req.cookies["user_id"]];
-  if (cookies) {
-    const longURL = urlDatabase[req.params.shortURL]["longURL"];
-    res.redirect(longURL);
-  } else {
-    res.send("Please log in");
-  }
+  const longURL = urlDatabase[req.params.shortURL]["longURL"];
+  res.redirect(longURL);
 });
 
 
