@@ -18,6 +18,14 @@ const checkEmail = (testEmail) => {
     }
   }
 };
+const getUserByEmail = (email) => {
+  for (let user in users) {
+    if (users[user].email === email) {
+      return users[user];
+    }
+  }
+};
+
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -41,7 +49,6 @@ const users = {
     password: "dishwasher-funk"
   }
 };
-
 //renders /urls
 app.get("/urls", (req, res) => {
   let templateVars = {
@@ -58,6 +65,32 @@ app.get("/register", (req, res) => {
     user: users[req.cookies["user_id"]]
   };
   res.render("urls_register", templateVars);
+});
+
+//renders /urls/new
+app.get("/urls/new", (req, res) => {
+  let templateVars = {
+    user: users[req.cookies["user_id"]]
+  };
+  res.render("urls_new", templateVars);
+});
+
+//renders the page for :shortURL
+app.get("/urls/:shortURL", (req, res) => {
+  let templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
+    user: users[req.cookies["user_id"]]
+  };
+  res.render("urls_show", templateVars);
+});
+
+//renders page for /login
+app.get("/login",(req, res) => {
+  let templateVars = {
+    user: users[req.cookies["user_id"]]
+  };
+  res.render("urls_login", templateVars);
 });
 
 //adds new user to users
@@ -80,13 +113,25 @@ app.post("/register", (req, res) => {
   }
 });
 
-//renders /urls/new
-app.get("/urls/new", (req, res) => {
-  let templateVars = {
-    user: users[req.cookies["user_id"]]
-  };
-  res.render("urls_new", templateVars);
+//handles when submit is clicked /login
+app.post("/login", (req,res) => {
+  let email = req.body.email;
+  let password = req.body.password;
+  let user = getUserByEmail(email);
+  if (!checkEmail(email)) {
+    res.status(403);
+    res.send('403: email not found');
+  } else {
+    if (user.password !== password) {
+      res.status(403);
+      res.send("403: Wrong password/email");
+    } else if (user.password === password) {
+      res.cookie("user_id", user.id);
+      res.redirect("/urls");
+    }
+  }
 });
+
 
 //changes longURL associated to shortURL
 app.post("/urls/:shortURL", (req, res) => {
@@ -96,19 +141,9 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-//renders the page for :shortURL
-app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
-    user: users[req.cookies["user_id"]]
-  };
-  res.render("urls_show", templateVars);
-});
-
 //logs out when "logout" is clicked
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -132,12 +167,6 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-// //login cookies
-// app.post("/login", (req, res) => {
-//   let username = req.body.username;
-//   res.cookie("username", username);
-//   res.redirect("/urls");
-// });
 
 //gets the server to listen for input
 app.listen(PORT, () => {
