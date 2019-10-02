@@ -25,9 +25,15 @@ const getUserByEmail = (email) => {
     }
   }
 };
-
-
-
+const urlsForUser = (id) => {
+  let result = {};
+  for (let urls in urlDatabase) {
+    if (urlDatabase[urls].userID === id) {
+      result[urls] = urlDatabase[urls].longURL;
+    }
+  }
+  return result;
+};
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieparser());
 app.set("view engine", "ejs");
@@ -51,15 +57,6 @@ const urlDatabase = {
   "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" }
 };
 
-const urlsForUser = (id) => {
-  let result = {};
-  for (let urls in urlDatabase) {
-    if (urlDatabase[urls].userID === id) {
-      result[urls] = urlDatabase[urls].longURL;
-    }
-  }
-  return result;
-};
 
 //redirects to "home"
 app.get("/", (req,res) => {
@@ -76,7 +73,6 @@ app.get("/urls", (req, res) => {
       urls: urlsForUser(cookies.id),
       user: users[req.cookies["user_id"]]
     };
-    console.log(cookies.id);
     res.render("urls_index", templateVars);
   }
 });
@@ -168,10 +164,14 @@ app.post("/login", (req,res) => {
 
 //changes longURL associated to shortURL
 app.post("/urls/:shortURL", (req, res) => {
-  let shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = `http://${req.body.newURL}`;
-
-  res.redirect(`/urls/${shortURL}`);
+  let cookies = users[req.cookies["user_id"]];
+  if (cookies) {
+    let shortURL = req.params.shortURL;
+    urlDatabase[shortURL] = `http://${req.body.newURL}`;
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    res.send("ya ain't logged in!");
+  }
 });
 
 //logs out when "logout" is clicked
@@ -191,18 +191,28 @@ app.post("/urls", (req, res) => {
 
 //Removes URL from list
 app.post("/urls/:shortURL/delete",(req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+  let cookies = users[req.cookies["user_id"]];
+  if (cookies) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect("/urls");
+  } else {
+    res.send("ya ain't logged in!");
+  }
 });
 
 //redirects to full URL from short URL
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]["longURL"];
-  res.redirect(longURL);
+  let cookies = users[req.cookies["user_id"]];
+  if (cookies) {
+    const longURL = urlDatabase[req.params.shortURL]["longURL"];
+    res.redirect(longURL);
+  } else {
+    res.send("Please log in");
+  }
 });
 
 
 //gets the server to listen for input
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Welcome to TinyApp on PORT: ${PORT}!`);
 });
