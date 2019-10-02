@@ -44,13 +44,8 @@ const users = {
 
 //renders /urls
 app.get("/urls", (req, res) => {
-
-  let cookie = req.cookies["user_id"];
-  console.log(users[cookie]);
-  console.log(cookie);
   let templateVars = {
     urls: urlDatabase,
-    cookie: cookie,
     user: users[req.cookies["user_id"]]
   };
   res.render("urls_index", templateVars);
@@ -60,6 +55,7 @@ app.get("/urls", (req, res) => {
 app.get("/register", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_register", templateVars);
 });
@@ -87,7 +83,7 @@ app.post("/register", (req, res) => {
 //renders /urls/new
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-  
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_new", templateVars);
 });
@@ -105,8 +101,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    userID: req.cookies["user_id"],
-    user: req.cookies["user_id"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars);
 });
