@@ -33,6 +33,14 @@ const users = {
     password: "dishwasher-funk"
   }
 };
+const checkEmail = (testEmail) => {
+  for (let user in users) {
+    if (users[user].email === testEmail) {
+      return true;
+    }
+  }
+};
+
 
 //renders /urls
 app.get("/urls", (req, res) => {
@@ -54,14 +62,21 @@ app.get("/register", (req, res) => {
 //adds new user to users
 app.post("/register", (req, res) => {
   let newID = generateRandomString();
-  users[newID] = {
-    id: newID,
-    email: req.body.email,
-    password: req.body.password
-  };
-  res.cookie("user_id", newID);
-  console.log(users);
-  res.redirect("/urls");
+  if (req.body.email === '' || req.body.password === '') {
+    res.status(400);
+    res.send('400: Please put in a valid email/password');
+  } else if (checkEmail(req.body.email)) {
+    res.status(400);
+    res.send('400: Email already exists');
+  } else {
+    users[newID] = {
+      id: newID,
+      email: req.body.email,
+      password: req.body.password
+    };
+    res.cookie("user_id", newID);
+    res.redirect("/urls");
+  }
 });
 
 //renders /urls/new
