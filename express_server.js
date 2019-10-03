@@ -1,41 +1,11 @@
+/*------------boilerplate and functions/methods --------------*/
 const express = require("express");
 const app = express();
 const PORT = 3000;
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
-
-const generateRandomString = () => {
-  let result = '';
-  let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789';
-  for (let i = 0; i < 6; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-};
-const checkEmail = (testEmail) => {
-  for (let user in users) {
-    if (users[user].email === testEmail) {
-      return true;
-    }
-  }
-};
-const getUserByEmail = (email) => {
-  for (let user in users) {
-    if (users[user].email === email) {
-      return users[user];
-    }
-  }
-};
-const urlsForUser = (id) => {
-  let result = {};
-  for (let urls in urlDatabase) {
-    if (urlDatabase[urls].userID === id) {
-      result[urls] = urlDatabase[urls].longURL;
-    }
-  }
-  return result;
-};
+const { generateRandomString, checkEmail, getUserByEmail, urlsForUser } = require('./helpers');
 
 const users = {
   "userRandomID": {
@@ -65,10 +35,12 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
-//redirects to "home"
+//redirects to "home" aka /urls
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
+
+/*-------------all the routes that render a page --------------*/
 
 //renders /urls
 app.get("/urls", (req, res) => {
@@ -77,11 +49,9 @@ app.get("/urls", (req, res) => {
     res.redirect("/register");
   } else {
     let templateVars = {
-      urls: urlsForUser(cookies),
+      urls: urlsForUser(cookies, urlDatabase),
       user: users[req.session.userID]
     };
-    console.log(cookies.id);
-    console.log(urlsForUser(cookies));
     res.render("urls_index", templateVars);
   }
 });
@@ -131,32 +101,33 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 });
 
-//adds new user to users for /register
+/*----------------- all the routes that have a "function"/handle an event ------------------*/
+
+//adds new user to users object for /register
 app.post("/register", (req, res) => {
   let newID = generateRandomString();
+  const hashedPassword = bcrypt.hashSync(req.body.password, 10);
   if (req.body.email === '' || req.body.password === '') {
-    res.status(400);
-    res.send('400: Please put in a valid email/password');
-  } else if (checkEmail(req.body.email)) {
-    res.status(400);
-    res.send('400: Email already exists');
+    res.status(400).send("400: Please put in a valid email/password");
+  } else if (checkEmail(req.body.email, users)) {
+    res.status(400).send("400: Email already exists");
   } else {
     users[newID] = {
       id: newID,
       email: req.body.email,
-      password: bcrypt.hashSync(req.body.password, 10)
+      password: hashedPassword
     };
     req.session.userID = newID;
     res.redirect("/urls");
   }
 });
 
-//handles when submit is clicked /login
+//handles when submit is clicked @ /login and logs user in if credentials are valid
 app.post("/login", (req, res) => {
   let email = req.body.email;
   let password = req.body.password;
-  let user = getUserByEmail(email);
-  if (!checkEmail(email)) {
+  let user = getUserByEmail(email, users);
+  if (!checkEmail(email, users)) {
     res.status(403);
     res.send('403: email not found');
   } else {
@@ -171,7 +142,7 @@ app.post("/login", (req, res) => {
 });
 
 
-//changes longURL associated to shortURL
+//changes longURL associated with shortURL
 app.post("/urls/:shortURL", (req, res) => {
   let cookies = users[req.session.userID];
   if (cookies) {
@@ -179,7 +150,7 @@ app.post("/urls/:shortURL", (req, res) => {
     urlDatabase[shortURL] = `http://${req.body.newURL}`;
     res.redirect(`/urls/${shortURL}`);
   } else {
-    res.send("ya ain't logged in!");
+    res.send("ya ain't logged in! Log in and try again!");
   }
 });
 
@@ -190,7 +161,7 @@ app.post("/logout", (req, res) => {
 });
 
 
-//add new URLs
+//add new URLs to urlDatabase
 app.post("/urls", (req, res) => {
   let newId = generateRandomString();
   urlDatabase[newId] = {
@@ -199,7 +170,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${newId}`);
 });
 
-//Removes URL from list
+//Removes URL from urlDatabase
 app.post("/urls/:shortURL/delete", (req, res) => {
   let cookies = users[req.session.userID];
   if (cookies) {
