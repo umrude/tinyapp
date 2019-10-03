@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 
 //redirects to "home" aka /urls
 router.get("/", (req, res) => {
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 /*-------------all the routes that render a page --------------*/
