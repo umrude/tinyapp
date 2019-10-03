@@ -6,8 +6,8 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 !["Screenshot of URLs page"](https://github.com/umrude/tinyapp/blob/master/docs/urls_page.png?raw=true)
 !["Screenshot of shortURLs page"](https://github.com/umrude/tinyapp/blob/master/docs/urls_short.png?raw=true)
-!["Screenshot of register page"]()
-!["Screenshot of login page"]()
+!["Screenshot of register page"](https://github.com/umrude/tinyapp/blob/master/docs/urls_register.png?raw=true)
+!["Screenshot of login page"](https://github.com/umrude/tinyapp/blob/master/docs/urls_login.png?raw=true)
 
 ## Dependencies
 
