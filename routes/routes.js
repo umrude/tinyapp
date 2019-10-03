@@ -4,9 +4,14 @@ const { generateRandomString, checkEmail, getUserByEmail, urlsForUser } = requir
 const { users, urlDatabase } = require("../db.js");
 const bcrypt = require('bcrypt');
 
-//redirects to "home" aka /urls
+//redirects to "home" aka /urls depending on cookies
 router.get("/", (req, res) => {
-  res.redirect("/login");
+  let cookies = users[req.session.userID];
+  if (!cookies) {
+    res.redirect("/login");
+  } else if (cookies) {
+    res.redirect("/urls");
+  }
 });
 
 /*-------------all the routes that render a page --------------*/
